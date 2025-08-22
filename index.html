@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>All Exam Cutoffs — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand-dark:#0f172a; --brand-blue:#2563eb; --muted:#6b7280; --bg:#ffffff; --card:#ffffff; --border:#e6eef8;
+  --gen:#2563eb; --obc:#9333ea; --sc:#ef4444; --st:#16a34a; --ews:#f59e0b;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Roboto,Arial,sans-serif;background:var(--bg);color:#0b1220}
+header{background:linear-gradient(90deg,var(--brand-dark),var(--brand-blue));padding:28px 20px;text-align:left;color:white;box-shadow:0 6px 18px rgba(2,6,23,0.12)}
+header .title{font-family:Poppins,Arial,sans-serif;font-size:1.8rem;margin:0}
+header .subtitle{margin:6px 0 0;color:rgba(255,255,255,0.92);font-size:0.95rem}
+.container{display:flex;gap:18px;max-width:1200px;margin:18px auto;padding:12px}
+.sidebar{width:300px;background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--border);box-shadow:0 6px 18px rgba(12,18,40,0.04);height:74vh;overflow:auto}
+.sidebar h3{margin:0 0 10px 0;font-size:1rem;color:var(--muted);font-weight:700}
+.exam-list{display:flex;flex-direction:column;gap:8px}
+.exam-btn{padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid var(--border);cursor:pointer;text-align:left;font-weight:700;color:#0b1220}
+.exam-btn small{display:block;color:var(--muted);font-weight:500;margin-top:6px;font-size:12px}
+.exam-btn:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(37,99,235,0.08)}
+.main{flex:1;min-height:60vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.title-block h2{margin:0;font-family:Poppins,Arial,sans-serif;color:var(--brand-blue)}
+.title-block p{margin:6px 0 0;color:var(--muted);font-size:0.95rem}
+.controls{display:flex;gap:10px}
+.btn{background:var(--brand-blue);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.card{background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--border);min-width:210px;cursor:pointer;box-shadow:0 8px 22px rgba(2,6,23,0.04)}
+.card small{display:block;color:var(--muted);margin-top:8px}
+.details{background:var(--card);padding:16px;border-radius:12px;border:1px solid var(--border);box-shadow:0 6px 18px rgba(2,6,23,0.03)}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:14px}
+th{background:#fbfdff;color:var(--muted);font-weight:700}
+.chart{display:flex;gap:12px;align-items:flex-end;height:160px;padding:12px;margin-top:12px}
+.col{flex:1;border-radius:8px;padding-bottom:6px;display:flex;align-items:flex-end;justify-content:center}
+.col-label{margin-top:8px;text-align:center;font-size:13px;color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.legend .item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.legend .sw{width:14px;height:12px;border-radius:3px;display:inline-block}
+footer{max-width:1200px;margin:18px auto 40px auto;color:var(--muted);text-align:center;font-size:13px}
+@media(max-width:900px){
+  .container{flex-direction:column;padding:10px}
+  .sidebar{width:100%;height:auto;order:2}
+  .main{order:1}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div>
+      <div class="title">All Exam Cutoffs — 2025 (Expected)</div>
+      <div class="subtitle">Click any exam on the left → pick a sub-exam → view category-wise cutoffs (2022–2024) & expected 2025.</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <h3>All Exams (click any)</h3>
+    <div class="exam-list" id="examList"></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title-block">
+        <h2 id="mainTitle">Choose an Exam</h2>
+        <p id="subTitle">Left side shows all exams. Click to see sub-exams.</p>
+      </div>
+      <div class="controls">
+        <button class="btn" id="printBtn">Print</button>
+        <button class="btn secondary" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div id="subExamCards" class="cards"></div>
+
+    <div id="details" class="details" style="display:none">
+      <h3 id="detailHeading" style="margin:0;color:var(--brand-blue)"></h3>
+      <div id="tableWrap"></div>
+      <div id="chartArea">
+        <div class="chart" id="chartRow"></div>
+        <div class="legend" id="legendRow"></div>
+      </div>
+      <div style="margin-top:12px;color:var(--muted)">Expected 2025 = average of 2022, 2023, 2024 (rounded).</div>
+    </div>
+  </main>
+</div>
+
+<footer>© 2025 • Edit DATA object below to update cutoffs. Use for reference only.</footer>
+
+<script>
+// ---------- DATA (full main exams + many sub-exams) ----------
+const DATA = {
+  "SSC": {
+    title:"Staff Selection Commission",
+    exams:{
+      "CGL": { years:[
+        {year:2024,category:"GEN",cutoff:135},{year:2023,category:"GEN",cutoff:132},{year:2022,category:"GEN",cutoff:130},
+        {year:2024,category:"OBC",cutoff:120},{year:2023,category:"OBC",cutoff:118},{year:2022,category:"OBC",cutoff:115},
+        {year:2024,category:"SC",cutoff:105},{year:2023,category:"SC",cutoff:103},{year:2022,category:"SC",cutoff:100},
+        {year:2024,category:"ST",cutoff:95},{year:2023,category:"ST",cutoff:93},{year:2022,category:"ST",cutoff:90},
+        {year:2024,category:"EWS",cutoff:128},{year:2023,category:"EWS",cutoff:126},{year:2022,category:"EWS",cutoff:124}
+      ]},
+      "CHSL": { years:[
+        {year:2024,category:"GEN",cutoff:140},{year:2023,category:"GEN",cutoff:138},{year:2022,category:"GEN",cutoff:136},
+        {year:2024,category:"OBC",cutoff:123},{year:2023,category:"OBC",cutoff:121},{year:2022,category:"OBC",cutoff:119},
+        {year:2024,category:"SC",cutoff:108},{year:2023,category:"SC",cutoff:106},{year:2022,category:"SC",cutoff:104},
+        {year:2024,category:"ST",cutoff:98},{year:2023,category:"ST",cutoff:96},{year:2022,category:"ST",cutoff:94},
+        {year:2024,category:"EWS",cutoff:132},{year:2023,category:"EWS",cutoff:130},{year:2022,category:"EWS",cutoff:128}
+      ]},
+      "MTS": { years:[
+        {year:2024,category:"GEN",cutoff:110},{year:2023,category:"GEN",cutoff:108},{year:2022,category:"GEN",cutoff:106},
+        {year:2024,category:"OBC",cutoff:95},{year:2023,category:"OBC",cutoff:93},{year:2022,category:"OBC",cutoff:90},
+        {year:2024,category:"SC",cutoff:85},{year:2023,category:"SC",cutoff:83},{year:2022,category:"SC",cutoff:82},
+        {year:2024,category:"ST",cutoff:75},{year:2023,category:"ST",cutoff:73},{year:2022,category:"ST",cutoff:70},
+        {year:2024,category:"EWS",cutoff:100},{year:2023,category:"EWS",cutoff:98},{year:2022,category:"EWS",cutoff:96}
+      ]},
+      "JE": { years:[
+        {year:2024,category:"GEN",cutoff:120},{year:2023,category:"GEN",cutoff:118},{year:2022,category:"GEN",cutoff:115},
+        {year:2024,category:"OBC",cutoff:105},{year:2023,category:"OBC",cutoff:102},{year:2022,category:"OBC",cutoff:100},
+        {year:2024,category:"SC",cutoff:95},{year:2023,category:"SC",cutoff:92},{year:2022,category:"SC",cutoff:90},
+        {year:2024,category:"ST",cutoff:88},{year:2023,category:"ST",cutoff:85},{year:2022,category:"ST",cutoff:82},
+        {year:2024,category:"EWS",cutoff:110},{year:2023,category:"EWS",cutoff:108},{year:2022,category:"EWS",cutoff:105}
+      ]}
+    }
+  },
+
+  "Railway": {
+    title:"Indian Railways",
+    exams:{
+      "NTPC": { years:[
+        {year:2024,category:"GEN",cutoff:85},{year:2023,category:"GEN",cutoff:82},{year:2022,category:"GEN",cutoff:80},
+        {year:2024,category:"OBC",cutoff:78},{year:2023,category:"OBC",cutoff:76},{year:2022,category:"OBC",cutoff:74},
+        {year:2024,category:"SC",cutoff:70},{year:2023,category:"SC",cutoff:68},{year:2022,category:"SC",cutoff:66},
+        {year:2024,category:"ST",cutoff:62},{year:2023,category:"ST",cutoff:60},{year:2022,category:"ST",cutoff:58},
+        {year:2024,category:"EWS",cutoff:82},{year:2023,category:"EWS",cutoff:80},{year:2022,category:"EWS",cutoff:78}
+      ]},
+      "ALP": { years:[
+        {year:2024,category:"GEN",cutoff:70},{year:2023,category:"GEN",cutoff:68},{year:2022,category:"GEN",cutoff:66},
+        {year:2024,category:"OBC",cutoff:64},{year:2023,category:"OBC",cutoff:62},{year:2022,category:"OBC",cutoff:60},
+        {year:2024,category:"SC",cutoff:56},{year:2023,category:"SC",cutoff:54},{year:2022,category:"SC",cutoff:52},
+        {year:2024,category:"ST",cutoff:48},{year:2023,category:"ST",cutoff:46},{year:2022,category:"ST",cutoff:44},
+        {year:2024,category:"EWS",cutoff:68},{year:2023,category:"EWS",cutoff:66},{year:2022,category:"EWS",cutoff:64}
+      ]},
+      "Group D": { years:[
+        {year:2024,category:"GEN",cutoff:82},{year:2023,category:"GEN",cutoff:80},{year:2022,category:"GEN",cutoff:78},
+        {year:2024,category:"OBC",cutoff:76},{year:2023,category:"OBC",cutoff:74},{year:2022,category:"OBC",cutoff:72},
+        {year:2024,category:"SC",cutoff:68},{year:2023,category:"SC",cutoff:66},{year:2022,category:"SC",cutoff:64},
+        {year:2024,category:"ST",cutoff:58},{year:2023,category:"ST",cutoff:56},{year:2022,category:"ST",cutoff:54},
+        {year:2024,category:"EWS",cutoff:80},{year:2023,category:"EWS",cutoff:78},{year:2022,category:"EWS",cutoff:76}
+      ]}
+    }
+  },
+
+  "UPSC": {
+    title:"Union Public Service Commission",
+    exams:{
+      "IAS Prelims": { years:[
+        {year:2024,category:"GEN",cutoff:95},{year:2023,category:"GEN",cutoff:92},{year:2022,category:"GEN",cutoff:90},
+        {year:2024,category:"OBC",cutoff:88},{year:2023,category:"OBC",cutoff:85},{year:2022,category:"OBC",cutoff:82},
+        {year:2024,category:"SC",cutoff:76},{year:2023,category:"SC",cutoff:74},{year:2022,category:"SC",cutoff:72},
+        {year:2024,category:"ST",cutoff:70},{year:2023,category:"ST",cutoff:68},{year:2022,category:"ST",cutoff:66},
+        {year:2024,category:"EWS",cutoff:90},{year:2023,category:"EWS",cutoff:88},{year:2022,category:"EWS",cutoff:86}
+      ]},
+      "CDS": { years:[
+        {year:2024,category:"GEN",cutoff:120},{year:2023,category:"GEN",cutoff:118},{year:2022,category:"GEN",cutoff:115},
+        {year:2024,category:"OBC",cutoff:110},{year:2023,category:"OBC",cutoff:108},{year:2022,category:"OBC",cutoff:105},
+        {year:2024,category:"SC",cutoff:104},{year:2023,category:"SC",cutoff:102},{year:2022,category:"SC",cutoff:100},
+        {year:2024,category:"ST",cutoff:98},{year:2023,category:"ST",cutoff:96},{year:2022,category:"ST",cutoff:94},
+        {year:2024,category:"EWS",cutoff:118},{year:2023,category:"EWS",cutoff:116},{year:2022,category:"EWS",cutoff:114}
+      ]}
+    }
+  },
+
+  "Banking": {
+    title:"Bank Exams",
+    exams:{
+      "SBI PO": { years:[
+        {year:2024,category:"GEN",cutoff:85},{year:2023,category:"GEN",cutoff:83},{year:2022,category:"GEN",cutoff:80},
+        {year:2024,category:"OBC",cutoff:75},{year:2023,category:"OBC",cutoff:73},{year:2022,category:"OBC",cutoff:70},
+        {year:2024,category:"SC",cutoff:65},{year:2023,category:"SC",cutoff:63},{year:2022,category:"SC",cutoff:60},
+        {year:2024,category:"ST",cutoff:55},{year:2023,category:"ST",cutoff:53},{year:2022,category:"ST",cutoff:50},
+        {year:2024,category:"EWS",cutoff:82},{year:2023,category:"EWS",cutoff:80},{year:2022,category:"EWS",cutoff:78}
+      ]},
+      "IBPS PO": { years:[
+        {year:2024,category:"GEN",cutoff:70},{year:2023,category:"GEN",cutoff:68},{year:2022,category:"GEN",cutoff:65},
+        {year:2024,category:"OBC",cutoff:64},{year:2023,category:"OBC",cutoff:62},{year:2022,category:"OBC",cutoff:60},
+        {year:2024,category:"SC",cutoff:58},{year:2023,category:"SC",cutoff:56},{year:2022,category:"SC",cutoff:54},
+        {year:2024,category:"ST",cutoff:50},{year:2023,category:"ST",cutoff:48},{year:2022,category:"ST",cutoff:46},
+        {year:2024,category:"EWS",cutoff:68},{year:2023,category:"EWS",cutoff:66},{year:2022,category:"EWS",cutoff:64}
+      ]}
+    }
+  },
+
+  "Defence": {
+    title:"Defence & Armed Forces",
+    exams:{
+      "NDA": { years:[
+        {year:2024,category:"GEN",cutoff:300},{year:2023,category:"GEN",cutoff:295},{year:2022,category:"GEN",cutoff:290},
+        {year:2024,category:"OBC",cutoff:280},{year:2023,category:"OBC",cutoff:278},{year:2022,category:"OBC",cutoff:275},
+        {year:2024,category:"SC",cutoff:260},{year:2023,category:"SC",cutoff:258},{year:2022,category:"SC",cutoff:255},
+        {year:2024,category:"ST",cutoff:250},{year:2023,category:"ST",cutoff:248},{year:2022,category:"ST",cutoff:245},
+        {year:2024,category:"EWS",cutoff:295},{year:2023,category:"EWS",cutoff:292},{year:2022,category:"EWS",cutoff:290}
+      ]},
+      "CDS": { years:[
+        {year:2024,category:"GEN",cutoff:120},{year:2023,category:"GEN",cutoff:118},{year:2022,category:"GEN",cutoff:115},
+        {year:2024,category:"OBC",cutoff:110},{year:2023,category:"OBC",cutoff:108},{year:2022,category:"OBC",cutoff:105},
+        {year:2024,category:"SC",cutoff:104},{year:2023,category:"SC",cutoff:102},{year:2022,category:"SC",cutoff:100},
+        {year:2024,category:"ST",cutoff:98},{year:2023,category:"ST",cutoff:96},{year:2022,category:"ST",cutoff:94},
+        {year:2024,category:"EWS",cutoff:118},{year:2023,category:"EWS",cutoff:116},{year:2022,category:"EWS",cutoff:115}
+      ]}
+    }
+  },
+
+  "State Exams": {
+    title:"State Level Exams",
+    exams:{
+      "UPPSC": { years:[
+        {year:2024,category:"GEN",cutoff:120},{year:2023,category:"GEN",cutoff:118},{year:2022,category:"GEN",cutoff:115},
+        {year:2024,category:"OBC",cutoff:110},{year:2023,category:"OBC",cutoff:108},{year:2022,category:"OBC",cutoff:106},
+        {year:2024,category:"SC",cutoff:100},{year:2023,category:"SC",cutoff:98},{year:2022,category:"SC",cutoff:96},
+        {year:2024,category:"ST",cutoff:95},{year:2023,category:"ST",cutoff:93},{year:2022,category:"ST",cutoff:92},
+        {year:2024,category:"EWS",cutoff:118},{year:2023,category:"EWS",cutoff:116},{year:2022,category:"EWS",cutoff:115}
+      ]},
+      "MPPSC": { years:[
+        {year:2024,category:"GEN",cutoff:110},{year:2023,category:"GEN",cutoff:108},{year:2022,category:"GEN",cutoff:106},
+        {year:2024,category:"OBC",cutoff:102},{year:2023,category:"OBC",cutoff:100},{year:2022,category:"OBC",cutoff:98},
+        {year:2024,category:"SC",cutoff:92},{year:2023,category:"SC",cutoff:90},{year:2022,category:"SC",cutoff:88},
+        {year:2024,category:"ST",cutoff:86},{year:2023,category:"ST",cutoff:84},{year:2022,category:"ST",cutoff:82},
+        {year:2024,category:"EWS",cutoff:105},{year:2023,category:"EWS",cutoff:103},{year:2022,category:"EWS",cutoff:102}
+      ]}
+    }
+  },
+
+  "Teaching": {
+    title:"Teaching Exams",
+    exams:{
+      "CTET": { years:[
+        {year:2024,category:"GEN",cutoff:90},{year:2023,category:"GEN",cutoff:88},{year:2022,category:"GEN",cutoff:85},
+        {year:2024,category:"OBC",cutoff:80},{year:2023,category:"OBC",cutoff:78},{year:2022,category:"OBC",cutoff:76},
+        {year:2024,category:"SC",cutoff:70},{year:2023,category:"SC",cutoff:68},{year:2022,category:"SC",cutoff:66},
+        {year:2024,category:"ST",cutoff:65},{year:2023,category:"ST",cutoff:63},{year:2022,category:"ST",cutoff:62},
+        {year:2024,category:"EWS",cutoff:88},{year:2023,category:"EWS",cutoff:86},{year:2022,category:"EWS",cutoff:85}
+      ]}
+    }
+  },
+
+  "Police & Judiciary": {
+    title:"Police / Judiciary / SSC GD etc.",
+    exams:{
+      "State Police Constable": { years:[
+        {year:2024,category:"GEN",cutoff:75},{year:2023,category:"GEN",cutoff:73},{year:2022,category:"GEN",cutoff:70},
+        {year:2024,category:"OBC",cutoff:68},{year:2023,category:"OBC",cutoff:66},{year:2022,category:"OBC",cutoff:64},
+        {year:2024,category:"SC",cutoff:60},{year:2023,category:"SC",cutoff:58},{year:2022,category:"SC",cutoff:56},
+        {year:2024,category:"ST",cutoff:55},{year:2023,category:"ST",cutoff:53},{year:2022,category:"ST",cutoff:52},
+        {year:2024,category:"EWS",cutoff:72},{year:2023,category:"EWS",cutoff:70},{year:2022,category:"EWS",cutoff:68}
+      ]},
+      "Judiciary (State PCS-J)": { years:[
+        {year:2024,category:"GEN",cutoff:120},{year:2023,category:"GEN",cutoff:118},{year:2022,category:"GEN",cutoff:115},
+        {year:2024,category:"OBC",cutoff:110},{year:2023,category:"OBC",cutoff:108},{year:2022,category:"OBC",cutoff:105},
+        {year:2024,category:"SC",cutoff:100},{year:2023,category:"SC",cutoff:98},{year:2022,category:"SC",cutoff:96},
+        {year:2024,category:"ST",cutoff:95},{year:2023,category:"ST",cutoff:93},{year:2022,category:"ST",cutoff:92},
+        {year:2024,category:"EWS",cutoff:115},{year:2023,category:"EWS",cutoff:113},{year:2022,category:"EWS",cutoff:110}
+      ]}
+    }
+  },
+
+  "PSU / Others": {
+    title:"PSU & Other Exams",
+    exams:{
+      "GATE": { years:[
+        {year:2024,category:"GEN",cutoff:720},{year:2023,category:"GEN",cutoff:710},{year:2022,category:"GEN",cutoff:700},
+        {year:2024,category:"OBC",cutoff:680},{year:2023,category:"OBC",cutoff:670},{year:2022,category:"OBC",cutoff:660},
+        {year:2024,category:"SC",cutoff:620},{year:2023,category:"SC",cutoff:610},{year:2022,category:"SC",cutoff:600},
+        {year:2024,category:"ST",cutoff:580},{year:2023,category:"ST",cutoff:570},{year:2022,category:"ST",cutoff:560},
+        {year:2024,category:"EWS",cutoff:700},{year:2023,category:"EWS",cutoff:690},{year:2022,category:"EWS",cutoff:680}
+      ]},
+      "NEET (example)": { years:[
+        {year:2024,category:"GEN",cutoff:720},{year:2023,category:"GEN",cutoff:715},{year:2022,category:"GEN",cutoff:710},
+        {year:2024,category:"OBC",cutoff:680},{year:2023,category:"OBC",cutoff:675},{year:2022,category:"OBC",cutoff:670},
+        {year:2024,category:"SC",cutoff:540},{year:2023,category:"SC",cutoff:535},{year:2022,category:"SC",cutoff:530},
+        {year:2024,category:"ST",cutoff:480},{year:2023,category:"ST",cutoff:475},{year:2022,category:"ST",cutoff:470},
+        {year:2024,category:"EWS",cutoff:700},{year:2023,category:"EWS",cutoff:695},{year:2022,category:"EWS",cutoff:690}
+      ]}
+    }
+  }
+
+}; // end DATA
+
+// Category color map
+const CAT_COLORS = {"GEN":"var(--gen)","OBC":"var(--obc)","SC":"var(--sc)","ST":"var(--st)","EWS":"var(--ews)"};
+
+// Render sidebar buttons
+function renderExamButtons(){
+  const wrap = document.getElementById('examList');
+  wrap.innerHTML = '';
+  for(const main of Object.keys(DATA)){
+    const btn = document.createElement('div');
+    btn.className = 'exam-btn';
+    btn.innerHTML = `<div>${main}</div><small>${DATA[main].title}</small>`;
+    btn.onclick = ()=> openMainExam(main);
+    wrap.appendChild(btn);
+  }
+}
+
+// Show sub-exam cards of selected main exam
+function openMainExam(mainKey){
+  document.getElementById('mainTitle').textContent = `${mainKey} — ${DATA[mainKey].title}`;
+  document.getElementById('subTitle').textContent = 'Click any sub-exam card to view cutoffs (2022-2024) & expected 2025.';
+  const cardsDiv = document.getElementById('subExamCards');
+  cardsDiv.innerHTML = '';
+  const exams = DATA[mainKey].exams || {};
+  for(const sub of Object.keys(exams)){
+    const card = document.createElement('div');
+    card.className = 'card';
+    const cats = [...new Set(exams[sub].years.map(y=>y.category))];
+    card.innerHTML = `<strong>${sub}</strong><small>Categories: ${cats.join(', ')}</small>`;
+    card.onclick = ()=> openSubExam(mainKey, sub);
+    cardsDiv.appendChild(card);
+  }
+  document.getElementById('details').style.display = 'none';
+}
+
+// Show table + chart for sub-exam
+function openSubExam(mainKey, subKey){
+  const subData = DATA[mainKey].exams[subKey];
+  document.getElementById('detailHeading').textContent = `${subKey} — ${mainKey}`;
+  const tableWrap = document.getElementById('tableWrap');
+  tableWrap.innerHTML = '';
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr><th>Category</th><th>2022</th><th>2023</th><th>2024</th><th>Expected 2025</th></tr></thead>`;
+  const tbody = document.createElement('tbody');
+
+  // group by category
+  const byCat = {};
+  (subData.years || []).forEach(r=>{
+    byCat[r.category] = byCat[r.category] || {};
+    byCat[r.category][r.year] = r.cutoff;
+  });
+
+  const catOrder = ["GEN","OBC","SC","ST","EWS"];
+  const presentCats = Object.keys(byCat).sort((a,b)=> catOrder.indexOf(a) - catOrder.indexOf(b));
+
+  // ensure all five categories shown if missing — show '-' if absent
+  for(const cat of catOrder){
+    const data = byCat[cat] || {};
+    const v2022 = (data[2022]!==undefined)?data[2022]:'-';
+    const v2023 = (data[2023]!==undefined)?data[2023]:'-';
+    const v2024 = (data[2024]!==undefined)?data[2024]:'-';
+    const nums = [v2022,v2023,v2024].filter(v=>typeof v === 'number');
+    const expected = nums.length ? Math.round(nums.reduce((s,n)=>s+n,0)/nums.length) : '-';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="font-weight:700">${cat}</td><td>${v2022}</td><td>${v2023}</td><td>${v2024}</td><td style="font-weight:700">${expected}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+
+  // chart
+  const chartRow = document.getElementById('chartRow'); chartRow.innerHTML = '';
+  const legendRow = document.getElementById('legendRow'); legendRow.innerHTML = '';
+
+  // compute expected values for each category
+  const expVals = {};
+  for(const cat of Object.keys(byCat)){
+    const data = byCat[cat];
+    const nums = [data[2022], data[2023], data[2024]].filter(v=>typeof v === 'number');
+    expVals[cat] = nums.length ? Math.round(nums.reduce((s,n)=>s+n,0)/nums.length) : 0;
+  }
+
+  // ensure fixed order for display
+  const displayCats = ["GEN","OBC","SC","ST","EWS"];
+  const maxExp = Math.max(...displayCats.map(c=>expVals[c]||0), 1);
+
+  for(const cat of displayCats){
+    const exp = expVals[cat] || 0;
+    const h = Math.max(28, Math.round((exp / maxExp) * 140));
+    const divWrap = document.createElement('div'); divWrap.style.flex='1'; divWrap.style.display='flex'; divWrap.style.flexDirection='column'; divWrap.style.alignItems='center';
+    const col = document.createElement('div'); col.className='col'; col.style.height = h + 'px'; col.style.background = CAT_COLORS[cat] || '#94a3b8';
+    divWrap.appendChild(col);
+    const lbl = document.createElement('div'); lbl.className='col-label'; lbl.textContent = `${cat} — ${exp || '-'}`;
+    divWrap.appendChild(lbl);
+    chartRow.appendChild(divWrap);
+
+    // legend
+    const leg = document.createElement('div'); leg.className='item';
+    const sw = document.createElement('span'); sw.className='sw'; sw.style.background = CAT_COLORS[cat] || '#94a3b8';
+    leg.appendChild(sw);
+    const t = document.createElement('span'); t.textContent = cat; leg.appendChild(t);
+    legendRow.appendChild(leg);
+  }
+
+  document.getElementById('details').style.display = 'block';
+}
+
+// bindings
+document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+document.getElementById('resetBtn').addEventListener('click', ()=>location.reload());
+
+// initial render
+renderExamButtons();
+const first = Object.keys(DATA)[0];
+if(first) openMainExam(first);
+</script>
+</body>
+</html>
